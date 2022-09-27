@@ -2,6 +2,8 @@
 
 ![](https://user-images.githubusercontent.com/25827968/63228948-0d8ff100-c1fb-11e9-95d8-e5df195ba18e.png)
 
+forked from fszymanski/fzf-quickfix
+
 ## Requirements
 - [fzf](https://github.com/junegunn/fzf)
 

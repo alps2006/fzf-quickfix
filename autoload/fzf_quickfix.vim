@@ -29,14 +29,14 @@ endfunction
 
 function! s:format_error(item) abort
   return (a:item.bufnr ? bufname(a:item.bufnr) : '')
-        \ . '|' . (a:item.lnum  ? a:item.lnum : '')
-        \ . (a:item.col ? ' col ' . a:item.col : '')
+        \ . ':' . (a:item.lnum  ? a:item.lnum : '')
+        \ . ':' . (a:item.col ? a:item.col : '0')
         \ . s:error_type(a:item.type, a:item.nr)
-        \ . '|' . substitute(a:item.text, '\v^\s*', ' ', '')
+        \ . ':' . substitute(a:item.text, '\v^\s*', ' ', '')
 endfunction
 
 function! s:error_handler(err) abort
-  let l:match = matchlist(a:err, '\v^([^|]*)\|(\d+)?%(\scol\s(\d+))?.*\|')[1:3]
+  let l:match = matchlist(a:err, '\v^([^:]*):(\d+)?%(:(\d+))?.*:')[1:3]
   if empty(l:match) || empty(l:match[0])
     return
   endif
@@ -45,10 +45,16 @@ function! s:error_handler(err) abort
     return
   endif
 
+  let l:path = l:match[0] 
+  let l:bnum = bufnr(l:path)
   let l:lnum = empty(l:match[1]) ? 1 : str2nr(l:match[1])
   let l:col = empty(l:match[2]) ? 1 : str2nr(l:match[2])
 
-  execute 'buffer' bufnr(l:match[0])
+  if l:bnum == -1
+    execute 'e ' . l:path
+  elseif l:bnum != bufnr()
+    execute 'e#' . l:bnum
+  endif
   call cursor(l:lnum, l:col)
   normal! zvzz
 endfunction
@@ -67,12 +73,13 @@ function! s:syntax() abort
 endfunction
 
 function! fzf_quickfix#run(...) abort
-  call fzf#run(fzf#wrap({
+  let l:opts = {
         \ 'source': map(a:1 ? getloclist(0) : getqflist(), 's:format_error(v:val)'),
-        \ 'sink': function('s:error_handler'),
-        \ 'options': printf('--prompt="%s> "', (a:1 ? 'LocList' : 'QfList'))
-        \ }))
-
+        \ 'column': 1,
+        \ 'sink*': function('s:error_handler'),
+        \ 'options': fzf#vim#with_preview({'options': '--ansi --preview-window +{2}-/2 ' . printf('--prompt="%s> "', (a:1 ? 'LocList' : 'QfList')) . ' --color hl:4,hl+:12 --delimiter ":" --nth 1,4.. --no-sort --layout=reverse-list --bind alt-j:preview-down,alt-k:preview-up,alt-d:preview-half-page-down,alt-u:preview-half-page-up'}, 'up:wrap:60%', '?')['options']
+        \ }
+  call fzf#run(fzf#wrap('quickfix', l:opts, 1))
   if g:fzf_quickfix_syntax_on
     call s:syntax()
   endif
