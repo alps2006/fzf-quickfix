@@ -13,7 +13,7 @@ Using the (Neo)vim built-in (kind of) plugin manager:
 
 ```sh
 $ cd path/to/pack/foo/start
-$ git clone https://github.com/fszymanski/fzf-quickfix.git
+$ git clone https://github.com/alps2006/fzf-quickfix.git
 ```
 
 Using your favorite (Neo)vim plugin manager:
