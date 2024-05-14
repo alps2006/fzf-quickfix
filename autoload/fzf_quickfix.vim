@@ -7,6 +7,8 @@ scriptencoding utf-8
 let s:keep_cpo = &cpoptions
 set cpoptions&vim
 
+if !hlexists('FzfQfSearch') | hi default link FzfQfSearch Search | endif |
+
 function! s:error_type(type, nr) abort
   if a:type ==? 'W'
     let l:msg = ' warning'
@@ -57,6 +59,8 @@ function! s:error_handler(err) abort
   endif
   call cursor(l:lnum, l:col)
   normal! zvzz
+  " Clear all searchs
+  call clearmatches('FzfQfSearch')
 endfunction
 
 function! s:syntax() abort
@@ -82,6 +86,11 @@ function! fzf_quickfix#run(...) abort
   call fzf#run(fzf#wrap('quickfix', l:opts, 1))
   if g:fzf_quickfix_syntax_on
     call s:syntax()
+  endif
+
+  " Highlight search text
+  if a:0 > 1 && !empty(a:2)
+    call matchadd('FzfQfSearch', a:2)
   endif
 endfunction
 

@@ -16,8 +16,8 @@ if !exists('g:fzf_quickfix_syntax_on')
   let g:fzf_quickfix_syntax_on = 1
 endif
 
-execute 'command! -bang' get(g:, 'fzf_command_prefix', '')
-      \ . 'Quickfix call fzf_quickfix#run("<bang>" ==# "!")'
+execute 'command! -bang -nargs=?' get(g:, 'fzf_command_prefix', '')
+      \ . 'Quickfix call fzf_quickfix#run("<bang>" ==# "!", <f-args>)'
 
 let &cpoptions = s:keep_cpo
 unlet s:keep_cpo
